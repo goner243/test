@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ using System.Windows.Forms;
 using NAudio;
 using NAudio.CoreAudioApi;
 using NAudio.Dsp;
+using NAudio.Utils;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 
@@ -21,8 +23,10 @@ namespace test
         int n = 1024; // number of x-axis pints
         //Stopwatch time = new Stopwatch();
         WaveIn wi;
-        Queue<double> myQ;
-        Queue<double> spec;
+        WaveOut wo;
+        List<double> myQ;
+        List<double> spec;
+        List<double> noise;
         NeuralNet nn = new NeuralNet(32, 3);
 
         public Form1()
@@ -38,8 +42,9 @@ namespace test
 
             comboBox1.SelectedIndex = 0;
 
-            myQ = new Queue<double>(Enumerable.Repeat(0.0, n).ToList()); // fill myQ w/ zeros
-            spec = new Queue<double>(Enumerable.Repeat(0.0, n / 16).ToList());
+            myQ = new List<double>(Enumerable.Repeat(0.0, n)); // fill myQ w/ zeros
+            spec = new List<double>(Enumerable.Repeat(0.0, n / 8));
+            noise = new List<double>(Enumerable.Repeat(0.0, n ));
             chart1.ChartAreas[0].AxisY.Minimum = -volume;
             chart1.ChartAreas[0].AxisY.Maximum = volume;
 
@@ -51,6 +56,8 @@ namespace test
         private void Form1_Load(object sender, EventArgs e)
         {
             wi = new WaveIn();
+            wo = new WaveOut();
+
             wi.StartRecording();
             wi.WaveFormat = new WaveFormat(4, 16, 1); // (44100, 16, 1);
             wi.DataAvailable += new EventHandler<WaveInEventArgs>(wi_DataAvailable);
@@ -67,7 +74,8 @@ namespace test
 
             for (int i = 0; i < n; i += 2)
             {
-                c[i] = BitConverter.ToInt16(buffer, i);
+                c[i] = new System.Numerics.Complex(BitConverter.ToInt16(buffer, i), 0);
+                c[i + 1] = new System.Numerics.Complex(BitConverter.ToInt16(buffer, i), 0);
             }
 
             var fft = FFT.fft(c);
@@ -75,18 +83,27 @@ namespace test
 
             for (int i = 0; i < n; i += 1)
             {
-                spec.Enqueue(nfft[i].Magnitude * int.Parse(label3.Text) * 2);
-                spec.Dequeue();
+                spec.Add(fft[i].Magnitude * int.Parse(label3.Text));
+                spec.RemoveAt(0);
             }
 
-            spec = new Queue<double>(spec.Reverse());
+            spec.Reverse();
+
+            label4.Text = spec.IndexOf(spec.Max(a => a)).ToString();
 
             for (int i = 0; i < e.BytesRecorded; i += 2)
             {
-                myQ.Enqueue(BitConverter.ToInt16(buffer, i) * int.Parse(label3.Text));
-                myQ.Dequeue();
+                myQ.Add(BitConverter.ToInt16(buffer, i) * int.Parse(label3.Text));
+                myQ.RemoveAt(0);
             }
 
+            //for (int i = 0; i < e.BytesRecorded; i += 2)
+            //{
+            //    noise.Add(myQ.FindAll(a => a > 0).Average(b => b));
+            //    noise.RemoveAt(0);
+            //}
+
+            label5.Text = myQ.FindAll(a => a > 0).Average(b => b).ToString();
         }
 
         private void timer1_Tick(object sender, EventArgs e)
