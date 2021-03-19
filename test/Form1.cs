@@ -33,7 +33,7 @@ namespace test
         {
             InitializeComponent();
 
-
+            //Получаем скисок устройств записи
             for (int n = 0; n < WaveIn.DeviceCount; n++)
             {
                 var caps = WaveIn.GetCapabilities(n);
@@ -42,9 +42,12 @@ namespace test
 
             comboBox1.SelectedIndex = 0;
 
-            myQ = new List<double>(Enumerable.Repeat(0.0, n)); // fill myQ w/ zeros
+            //Заполняем листы нулями
+            myQ = new List<double>(Enumerable.Repeat(0.0, n));
             spec = new List<double>(Enumerable.Repeat(0.0, n / 8));
             noise = new List<double>(Enumerable.Repeat(0.0, n ));
+
+            //Указываем диапозон выводных графиков
             chart1.ChartAreas[0].AxisY.Minimum = -volume;
             chart1.ChartAreas[0].AxisY.Maximum = volume;
 
@@ -52,7 +55,7 @@ namespace test
             chart2.ChartAreas[0].AxisY.Maximum = volume * 100;
         }
 
-
+        //Инициализация че :)
         private void Form1_Load(object sender, EventArgs e)
         {
             wi = new WaveIn();
@@ -70,6 +73,7 @@ namespace test
         {
             byte[] buffer = e.Buffer;
 
+            //Преобразование байтов по фурье
             System.Numerics.Complex[] c = new System.Numerics.Complex[n];
 
             for (int i = 0; i < n; i += 2)
@@ -81,6 +85,7 @@ namespace test
             var fft = FFT.fft(c);
             var nfft = FFT.nfft(fft);
 
+            //Заполняем лист с данными спектрального анализа (собственно теми самыми фурье :))
             for (int i = 0; i < n; i += 1)
             {
                 spec.Add(fft[i].Magnitude * int.Parse(label3.Text));
@@ -91,6 +96,7 @@ namespace test
 
             label4.Text = spec.IndexOf(spec.Max(a => a)).ToString();
 
+            //Заполняем лист с данными о звуковой волне
             for (int i = 0; i < e.BytesRecorded; i += 2)
             {
                 myQ.Add(BitConverter.ToInt16(buffer, i) * int.Parse(label3.Text));
@@ -106,6 +112,7 @@ namespace test
             label5.Text = myQ.FindAll(a => a > 0).Average(b => b).ToString();
         }
 
+        //Тут просто рисуем все что получили выше
         private void timer1_Tick(object sender, EventArgs e)
         {
             try
@@ -143,6 +150,7 @@ namespace test
             label2.Text = trackBar1.Value.ToString();
         }
 
+        //Выбор устройства ввода
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (wi != null)

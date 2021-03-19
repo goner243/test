@@ -50,6 +50,7 @@ namespace test
 
         Neural[,] Neurals;
 
+        //Инициализация сетки
         public NeuralNet(int neuronCount, int layers)
         {
             NeuronCount = neuronCount;
@@ -65,6 +66,7 @@ namespace test
             }
         }
 
+        //Расчет выхода, сначала считаем первыцй слой относительно входных данных, затем считаем все последующие относительно предидущего слоя
         public double CalculateOut(double input)
         {
             double sum = 0;
@@ -83,7 +85,7 @@ namespace test
                 else
                 {
                     double layerSum = 0;
-
+                    //Кстати тут ошибся :) тут нужно не текущий с текущим а текущий с каждым :)
                     for (int j = 0; j < NeuronCount; j++)
                     {
                         Neurals[i, j].CalculateN(Neurals[i - 1, j].current);
@@ -98,6 +100,8 @@ namespace test
             return sum;
         }
 
+
+        //Приведение входных значений к диапозону  0-1
         public List<double> Normalize(List<double> inputs)
         {
             List<double> outputs = new List<double>();
