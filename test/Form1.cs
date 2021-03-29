@@ -20,8 +20,7 @@ namespace test
     public partial class Form1 : Form
     {
         int volume = 5000;
-        int n = 1024; // number of x-axis pints
-        //Stopwatch time = new Stopwatch();
+        int n = 1024; 
         WaveIn wi;
         WaveOut wo;
         List<double> myQ;
@@ -103,12 +102,6 @@ namespace test
                 myQ.RemoveAt(0);
             }
 
-            //for (int i = 0; i < e.BytesRecorded; i += 2)
-            //{
-            //    noise.Add(myQ.FindAll(a => a > 0).Average(b => b));
-            //    noise.RemoveAt(0);
-            //}
-
             label5.Text = myQ.FindAll(a => a > 0).Average(b => b).ToString();
         }
 
@@ -169,13 +162,6 @@ namespace test
         private void trackBar2_ValueChanged(object sender, EventArgs e)
         {
             label3.Text = trackBar2.Value.ToString();
-        }
-
-        public void FindPatterns(int[] input)
-        {
-            int patternSize = 16;
-
-
         }
     }
 }
