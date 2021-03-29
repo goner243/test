@@ -71,6 +71,10 @@ namespace test
         void wi_DataAvailable(object sender, WaveInEventArgs e)
         {
             byte[] buffer = e.Buffer;
+            
+            ///
+            ///
+            ///
 
             //Преобразование байтов по фурье
             System.Numerics.Complex[] c = new System.Numerics.Complex[n];
@@ -95,6 +99,10 @@ namespace test
 
             label4.Text = spec.IndexOf(spec.Max(a => a)).ToString();
 
+            ///
+            ///
+            ///
+
             //Заполняем лист с данными о звуковой волне
             for (int i = 0; i < e.BytesRecorded; i += 2)
             {
@@ -116,6 +124,8 @@ namespace test
 
                 double sum = 0;
 
+
+                //Сетка лагает
                 //foreach (var a in normal)
                 //{
                 //    sum += nn.CalculateOut(a);
@@ -125,7 +135,16 @@ namespace test
 
                 //chart1.ResetAutoValues();
 
+                ///
+                ///
+                ///
+
+                ///заполняем спектр
                 chart2.Series["Series1"].Points.DataBindY(spec);
+
+                ///
+                ///
+                ///
             }
             catch
             {
