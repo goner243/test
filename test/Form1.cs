@@ -27,7 +27,7 @@ namespace test
         List<double> myQ;
         List<double> spec;
         List<double> noise;
-        NeuralNet nn = new NeuralNet(32, 3);
+        NeuralNet nn = new NeuralNet(16, 3);
 
         public Form1()
         {
@@ -123,10 +123,10 @@ namespace test
 
                 double sum = 0;
 
-                foreach (var a in normal)
-                {
-                    sum += nn.CalculateOut(a);
-                }
+                //foreach (var a in normal)
+                //{
+                //    sum += nn.CalculateOut(a);
+                //}
 
                 label1.Text = sum.ToString();
 

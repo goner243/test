@@ -24,9 +24,9 @@ namespace test
             CalcActivation(input);
             if (input >= activation)
             {
-                return current = input * weight;
+                return input * weight;
             }
-            return current = 0;
+            return 0;
         }
 
         public void ReCalcWheight(bool rightAnswer, double input)
@@ -71,24 +71,26 @@ namespace test
         {
             double sum = 0;
 
-            for(int i = 0; i < Layers; i++)
+            for (int i = 0; i < Layers; i++)
             {
                 if (i == 0)
                 {
                     for (int j = 0; j < NeuronCount; j++)
                     {
-                        Neurals[i, j].CalculateN(input);
+                        Neurals[i, j].current = Neurals[i, j].CalculateN(input);
 
                         sum = sum + Neurals[i, j].current;
-                    } 
+                    }
                 }
                 else
                 {
                     double layerSum = 0;
-                    //Кстати тут ошибся :) тут нужно не текущий с текущим а текущий с каждым :)
                     for (int j = 0; j < NeuronCount; j++)
                     {
-                        Neurals[i, j].CalculateN(Neurals[i - 1, j].current);
+                        for (int k = 0; k < NeuronCount; k++)
+                        {
+                            Neurals[i, j].current = Neurals[i, j].current + Neurals[i, j].CalculateN(Neurals[i -1, k].current);
+                        }
 
                         layerSum = layerSum + Neurals[i, j].current;
                     }
