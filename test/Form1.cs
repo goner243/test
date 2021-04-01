@@ -19,6 +19,7 @@ namespace test
 {
     public partial class Form1 : Form
     {
+        bool record = false;
         int volume = 5000;
         int n = 1024; 
         WaveIn wi;
@@ -32,6 +33,8 @@ namespace test
         {
             InitializeComponent();
 
+            progressBar1.Maximum = volume / 2;
+
             //Получаем скисок устройств записи
             for (int n = 0; n < WaveIn.DeviceCount; n++)
             {
@@ -42,8 +45,8 @@ namespace test
             comboBox1.SelectedIndex = 0;
 
             //Заполняем листы нулями
-            myQ = new List<double>(Enumerable.Repeat(0.0, n));
-            spec = new List<double>(Enumerable.Repeat(0.0, n / 8));
+            myQ = new List<double>(Enumerable.Repeat(1.0, n));
+            spec = new List<double>(Enumerable.Repeat(1.0, n / 8));
             noise = new List<double>(Enumerable.Repeat(0.0, n ));
 
             //Указываем диапозон выводных графиков
@@ -70,8 +73,17 @@ namespace test
 
         void wi_DataAvailable(object sender, WaveInEventArgs e)
         {
+            if (progressBar1.Value > trackBar1.Value)
+            {
+                record = true;
+            }
+            else
+            {
+                record = false;
+            }
+
             byte[] buffer = e.Buffer;
-            
+
             ///
             ///
             ///
@@ -91,8 +103,16 @@ namespace test
             //Заполняем лист с данными спектрального анализа (собственно теми самыми фурье :))
             for (int i = 0; i < n; i += 1)
             {
-                spec.Add(fft[i].Magnitude * int.Parse(label3.Text));
-                spec.RemoveAt(0);
+                if (record)
+                {
+                    spec.Add(fft[i].Magnitude * int.Parse(label3.Text));
+                    spec.RemoveAt(0); 
+                }
+                else
+                {
+                    spec.Add(1);
+                    spec.RemoveAt(0);
+                }
             }
 
             spec.Reverse();
@@ -106,11 +126,27 @@ namespace test
             //Заполняем лист с данными о звуковой волне
             for (int i = 0; i < e.BytesRecorded; i += 2)
             {
-                myQ.Add(BitConverter.ToInt16(buffer, i) * int.Parse(label3.Text));
-                myQ.RemoveAt(0);
+
+                if (record)
+                {
+                    myQ.Add(BitConverter.ToInt16(buffer, i) * int.Parse(label3.Text));
+                    myQ.RemoveAt(0); 
+                }
+                else
+                {
+                    myQ.Add(1);
+                    myQ.RemoveAt(0);
+                }
+
+                noise.Add(BitConverter.ToInt16(buffer, i) * int.Parse(label3.Text));
+                noise.RemoveAt(0);
+
             }
 
+            progressBar1.Value = (int)(noise.FindAll(a => a > 0).Average(b => b));
+
             label5.Text = myQ.FindAll(a => a > 0).Average(b => b).ToString();
+
         }
 
         //Тут просто рисуем все что получили выше
